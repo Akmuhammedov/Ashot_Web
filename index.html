@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Web - Admin: Aşyr</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            background: #121212;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        header h1 {
+            font-size: 20px;
+            color: #fe2c55;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding-bottom: 70px;
+        }
+        /* Feeds / TikTok Style */
+        .post-card {
+            background: #1a1a1a;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #2a2a2a;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            justify-content: space-between;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #fe2c55;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .username {
+            font-weight: bold;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .verified-badge {
+            color: #2087fc;
+            font-size: 14px;
+        }
+        .post-content {
+            font-size: 16px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .post-video {
+            width: 100%;
+            max-height: 450px;
+            border-radius: 8px;
+            background: #000;
+            object-fit: contain;
+        }
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        /* Navigation / Tabs */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 500px;
+            background: #121212;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #222;
+            z-index: 100;
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        nav button.active {
+            color: #fe2c55;
+            font-weight: bold;
+        }
+        /* Forms */
+        .tab-content {
+            display: none;
+            padding: 15px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 8px;
+        }
+        .file-upload-label {
+            display: block;
+            background: #222;
+            border: 2px dashed #444;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        .file-upload-label:hover {
+            border-color: #fe2c55;
+            color: #fff;
+        }
+        button.primary-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fe2c55;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        /* Admin Panel */
+        .admin-panel {
+            background: #1f1f1f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .admin-user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TikTok Web (Aşyr OS)</h1>
+        <span id="onlineCount" style="font-size: 12px; color: #00ff88;">● Online</span>
+    </header>
+
+    <div class="container">
+        <!-- FEED TAB -->
+        <div id="feedTab" class="tab-content active">
+            <h3 style="margin-bottom: 10px;">Täze Wideo Postlar</h3>
+            <div id="postsContainer"></div>
+        </div>
+
+        <!-- UPLOAD TAB -->
+        <div id="uploadTab" class="tab-content">
+            <h3>Galereýadan Wideo Goý</h3>
+            <input type="text" id="postAuthor" placeholder="Adyňyz..." />
+            <textarea id="postText" placeholder="Wideodo näme bar? (Düşündiriş)"></textarea>
+            
+            <label class="file-upload-label" for="videoFileInput">
+                📁 Galereýadan wideo saýlamak üçin basyň
+                <div id="fileNameDisplay" style="font-size: 12px; color: #fe2c55; margin-top: 5px;"></div>
+            </label>
+            <input type="file" id="videoFileInput" accept="video/*" style="display: none;" onchange="showFileName(this)" />
+
+            <button class="primary-btn" onclick="createPost()">Paýlaş</button>
+        </div>
+
+        <!-- CHAT TAB -->
+        <div id="chatTab" class="tab-content">
+            <h3>Bütin dünýä üçin Çat</h3>
+            <div id="chatBox" style="height: 300px; overflow-y: scroll; background: #161616; padding: 10px; border-radius: 8px; margin-bottom: 10px;"></div>
+            <input type="text" id="chatSender" placeholder="Adyňyz..." />
+            <input type="text" id="chatText" placeholder="Hat ýazyň..." />
+            <button class="primary-btn" onclick="sendMessage()">Ugrat</button>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="adminTab" class="tab-content">
+            <h3>Admin Panel (Aşyr)</h3>
+            <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Gök belligi diňe sen berip bilersiň.</p>
+            <div class="admin-panel">
+                <input type="password" id="adminPasswordInput" placeholder="Admin açar sözi (ashyr123)" />
+                <button class="primary-btn" onclick="checkAdmin()" style="margin-bottom: 15px;">Admin bol</button>
+                <div id="adminControls" style="display:none;">
+                    <h4>Ulanyjylara Gök Belgi Ber</h4>
+                    <div id="userListForAdmin"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <button class="active" onclick="switchTab('feedTab', this)">Esasy</button>
+        <button onclick="switchTab('uploadTab', this)">+ Wideo</button>
+        <button onclick="switchTab('chatTab', this)">Çat</button>
+        <button onclick="switchTab('adminTab', this)">Admin</button>
+    </nav>
+
+    <script>
+        let posts = JSON.parse(localStorage.getItem('tiktok_posts')) || [];
+        let messages = JSON.parse(localStorage.getItem('tiktok_messages')) || [];
+        let verifiedUsers = JSON.parse(localStorage.getItem('tiktok_verified')) || [];
+        let isAdmin = localStorage.getItem('tiktok_is_admin') === 'true';
+
+        function saveData() {
+            try {
+                localStorage.setItem('tiktok_posts', JSON.stringify(posts));
+                localStorage.setItem('tiktok_messages', JSON.stringify(messages));
+                localStorage.setItem('tiktok_verified', JSON.stringify(verifiedUsers));
+            } catch (e) {
+                alert("Ýat doldy! Has uly wideo ýüklemezden ozal beýleki postlary arassalaň.");
+            }
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            if(tabId === 'feedTab') renderPosts();
+            if(tabId === 'chatTab') renderMessages();
+            if(tabId === 'adminTab' && isAdmin) renderAdminPanel();
+        }
+
+        function showFileName(input) {
+            let display = document.getElementById('fileNameDisplay');
+            if(input.files && input.files[0]) {
+                display.innerText = "Saýlanan wideo: " + input.files[0].name;
+            }
+        }
+
+        // Galereýadan wideony alyp bazada saklamak
+        function createPost() {
+            let author = document.getElementById('postAuthor').value.trim();
+            let text = document.getElementById('postText').value.trim();
+            let videoInput = document.getElementById('videoFileInput');
+
+            if(!author || !text) {
+                alert("Adyňyzy we tekst ýazyň!");
+                return;
+            }
+
+            if(!videoInput.files || !videoInput.files[0]) {
+                alert("Galereýadan hökman wideo saýlaň!");
+                return;
+            }
+
+            let file = videoInput.files[0];
+            let reader = new FileReader();
+
+            reader.onload = function(e) {
+                let videoDataUrl = e.target.result; // Wideony Base64 formatda saklaýarys
+
+                let newPost = {
+                    id: Date.now(),
+                    author: author,
+                    text: text,
+                    videoUrl: videoDataUrl,
+                    likes: 0
+                };
+
+                posts.unshift(newPost); // Hemme adamyň öňünde çykmagy üçin
+                saveData();
+                
+                // Formany arassalaýarys
+                document.getElementById('postText').value = '';
+                document.getElementById('videoFileInput').value = '';
+                document.getElementById('fileNameDisplay').innerText = '';
+                
+                switchTab('feedTab', document.querySelectorAll('nav button')[0]);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function renderPosts() {
+            let container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            if(posts.length === 0) {
+                container.innerHTML = '<p style="color:#777; text-align:center;">Häzirlikçe wideo ýok. Birinji sen wideo goý!</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                let isVerified = verifiedUsers.includes(post.author);
+                let badgeHtml = isVerified ? '<span class="verified-badge" title="Gök belgi (Ashot_Borz tarapyndan berlen)">✔</span>' : '';
+                
+                let videoHtml = post.videoUrl ? `<video src="${post.videoUrl}" class="post-video" controls playsinline></video>` : '';
+
+                let card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div class="user-info">
+                            <div class="avatar">${post.author[0].toUpperCase()}</div>
+                            <span class="username">${post.author} ${badgeHtml}</span>
+                        </div>
+                    </div>
+                    <div class="post-content">${post.text}</div>
+                    ${videoHtml}
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="likePost(${post.id})">❤ ${post.likes}</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function likePost(id) {
+            let p = posts.find(item => item.id === id);
+            if(p) {
+                p.likes++;
+                saveData();
+                renderPosts();
+            }
+        }
+
+        // Çat funksiýalary
+        function sendMessage() {
+            let sender = document.getElementById('chatSender').value.trim();
+            let text = document.getElementById('chatText').value.trim();
+            if(!sender || !text) return;
+
+            messages.push({ sender, text });
+            saveData();
+            document.getElementById('chatText').value = '';
+            renderMessages();
+        }
+
+        function renderMessages() {
+            let box = document.getElementById('chatBox');
+            box.innerHTML = '';
+            messages.forEach(m => {
+                let isVerified = verifiedUsers.includes(m.sender);
+                let badge = isVerified ? '<span class="verified-badge">✔</span>' : '';
+                box.innerHTML += `<div style="margin-bottom: 8px;"><b>${m.sender} ${badge}:</b> ${m.text}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Admin Panel we Gök belgi
+        function checkAdmin() {
+            let pass = document.getElementById('adminPasswordInput').value;
+            if(pass === '15071577') {
+                isAdmin = true;
+                localStorage.setItem('tiktok_is_admin', 'true');
+                alert("Gök belgi bermek hukugyny gazandyňyz!");
+                renderAdminPanel();
+            } else {
+                alert("Nädogry parol!");
+            }
+        }
+
+        function renderAdminPanel() {
+            if(!isAdmin) return;
+            document.getElementById('adminControls').style.display = 'block';
+            document.getElementById('adminPasswordInput').parentElement.style.display = 'none';
+
+            let allUsers = [...new Set(posts.map(p => p.author).concat(messages.map(m => m.sender)))];
+            let listDiv = document.getElementById('userListForAdmin');
+            listDiv.innerHTML = '';
+
+            if(allUsers.length === 0) {
+                listDiv.innerHTML = '<p style="color:#777;">Ulanyjy ýok.</p>';
+                return;
+            }
+
+            allUsers.forEach(username => {
+                let isVer = verifiedUsers.includes(username);
+                let row = document.createElement('div');
+                row.className = 'admin-user-row';
+                row.innerHTML = `
+                    <span>${username} ${isVer ? '✔' : ''}</span>
+                    <button class="primary-btn" style="width: auto; padding: 5px 10px; background: ${isVer ? '#444' : '#2087fc'}" onclick="toggleVerified('${username}')">
+                        ${isVer ? 'Gök belligi aýyr' : 'Gök belgi ber'}
+                    </button>
+                `;
+                listDiv.appendChild(row);
+            });
+        }
+
+        function toggleVerified(username) {
+            if(verifiedUsers.includes(username)) {
+                verifiedUsers = verifiedUsers.filter(u => u !== username);
+            } else {
+                verifiedUsers.push(username);
+            }
+            saveData();
+            renderAdminPanel();
+            renderPosts();
+        }
+
+        if(isAdmin) {
+            document.getElementById('adminPasswordInput').parentElement.style.display = 'none';
+            document.getElementById('adminControls').style.display = 'block';
+        }
+        renderPosts();
+    </script>
+</body>
+</html>
